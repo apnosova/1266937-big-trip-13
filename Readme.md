@@ -1,7 +1,7 @@
 # Проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Ангелина Носова](https://up.htmlacademy.ru/ecmascript/13/user/1266937).
-* Наставник: [Иван Шалагин](https://htmlacademy.ru/profile/id386947).
+* Наставник: [Евгений Лепёшкин](https://htmlacademy.ru/profile/id144641).
 
 ---
 

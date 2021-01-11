@@ -11,7 +11,7 @@ export const EVENT_TYPES = [
   `Restaurant`,
 ];
 
-export const DESTINATIONS = [
+export const DESTINATION_CITIES = [
   `Amsterdam`,
   `Chamonix`,
   `Geneva`,

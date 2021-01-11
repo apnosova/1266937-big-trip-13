@@ -1,66 +1,79 @@
-import {createSiteMenuTemplate} from "./view/site-menu.js";
-import {createFilterTemplate} from "./view/filter.js";
-import {createTripInfoTemplate} from "./view/trip-info.js";
-import {createTripCostTemplate} from "./view/trip-cost.js";
-import {createSortTemplate} from "./view/sort.js";
-import {createFormEditTemplate} from "./view/form-edit.js";
-import {createFormAddTemplate} from "./view/form-add.js";
-import {createTripEventsListTemplate} from "./view/events-list.js";
-import {createTripEventTemplate} from "./view/trip-event.js";
+import SiteMenuView from "./view/site-menu.js";
+import FilterView from "./view/filter.js";
+import InfoView from "./view/info.js";
+import CostInfoView from "./view/cost-info.js";
+import MainInfoView from "./view/main-info.js";
+import SortView from "./view/sort.js";
+import EventEditView from "./view/event-edit.js";
+import EventView from "./view/event.js";
+import EventListView from "./view/event-list.js";
+import {generateEvent} from "./mock/event.js";
+import {generateFilter} from "./mock/filter.js";
+import {render, RenderPosition} from "./utils.js";
 
-import {generateEvent} from "./mock/trip-event.js";
 
-// Точка маршрута отрисовывается в списке 20 раза
 const EVENT_COUNT = 20;
 
 const events = new Array(EVENT_COUNT).fill().map(generateEvent).sort((a, b) =>
   a.time.start - b.time.start);
 
-const render = (container, template, position) => {
-  container.insertAdjacentHTML(position, template);
+const filters = generateFilter();
+
+// Замена точки маршрута на форму редактирования и обратно
+const renderEvent = (eventListElement, event) => {
+  const eventComponent = new EventView(event);
+  const eventEditComponent = new EventEditView(event);
+
+  const replacePointToForm = () => {
+    eventListElement.replaceChild(eventEditComponent.getElement(), eventComponent.getElement());
+  };
+
+  const replaceFormToPoint = () => {
+    eventListElement.replaceChild(eventComponent.getElement(), eventEditComponent.getElement());
+  };
+
+  eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replacePointToForm();
+  });
+
+  eventEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceFormToPoint();
+  });
+
+  render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
 // Информация о маршруте и стоимость поездки
 const tripMainElement = document.querySelector(`.trip-main`);
 
-render(tripMainElement, createTripInfoTemplate(), `afterbegin`);
+const infoComponent = new InfoView();
 
-const tripInfoElement = tripMainElement.querySelector(`.trip-info`);
+render(tripMainElement, infoComponent.getElement(), RenderPosition.AFTERBEGIN);
 
-render(tripInfoElement, createTripCostTemplate(), `beforeend`);
+render(infoComponent.getElement(), new MainInfoView().getElement(), RenderPosition.AFTERBEGIN);
+
+render(infoComponent.getElement(), new CostInfoView().getElement(), RenderPosition.BEFOREEND);
 
 // Меню
 const tripControlsElement = tripMainElement.querySelector(`.trip-main__trip-controls`);
-const titleElement = tripControlsElement.querySelectorAll(`h2`);
-render(titleElement[0], createSiteMenuTemplate(), `afterend`);
+
+render(tripControlsElement, new SiteMenuView().getElement(), RenderPosition.AFTERBEGIN);
 
 // Фильтр
-render(titleElement[1], createFilterTemplate(), `afterend`);
+render(tripControlsElement, new FilterView(filters).getElement(), RenderPosition.BEFOREEND);
 
 // Сортировка
 const tripEventsElement = document.querySelector(`.trip-events`);
 
-render(tripEventsElement, createSortTemplate(), `beforeend`);
+render(tripEventsElement, new SortView().getElement(), RenderPosition.BEFOREEND);
+
 // Список точек маршрута
-render(tripEventsElement, createTripEventsListTemplate(), `beforeend`);
+const eventListComponent = new EventListView();
 
-// Форма редактирования новой точки маршрута
-const eventsListElement = tripEventsElement.querySelector(`.trip-events__list`);
+render(tripEventsElement, eventListComponent.getElement(), RenderPosition.BEFOREEND);
 
-// const eventEditButton = tripEventsElement.querySelector(`.event__rollup-btn`);
-
-render(eventsListElement, createFormEditTemplate(events[0]), `afterbegin`);
-
-// Форма создания новой точки маршрута
-const eventAddButton = tripMainElement.querySelector(`.trip-main__event-add-btn`);
-
-const onEventAddButtonClick = function () {
-  render(eventsListElement, createFormAddTemplate(events[0]), `afterbegin`);
-};
-
-eventAddButton.addEventListener(`click`, onEventAddButtonClick);
-
-
+// Точка маршрута отрисовывается в списке 20 раз
 for (let i = 0; i < EVENT_COUNT; i++) {
-  render(eventsListElement, createTripEventTemplate(events[i]), `beforeend`);
+  renderEvent(eventListComponent.getElement(), events[i]);
 }
