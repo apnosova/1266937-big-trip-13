@@ -6,9 +6,9 @@ const createEventTemplate = (event) => {
 
   const favoriteClassName = isFavorite ? `event__favorite-btn--active` : ``;
 
-  const createOffersTemplate = offers.map((offer) => `<li class="event__offer">
+  const createOffersTemplate = offers.map((offer) => isChecked ? `<li class="event__offer">
     <span class="event__offer-title">${offer.description} </span>&plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span>
-  </li>`).join(``);
+  </li>` : ``).join(``);
 
   return `<li class="trip-events__item">
     <div class="event">
