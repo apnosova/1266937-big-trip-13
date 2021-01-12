@@ -34,7 +34,7 @@ const createEventEditTemplate = (event) => {
       </label>
     </div>`).join(``);
 
-  const createOffersContainerTemplate = offers.length !== 0
+  const createOffersContainerTemplate = (offers.length !== 0)
     ? `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
