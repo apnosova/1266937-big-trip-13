@@ -79,7 +79,7 @@ const renderInfo = (infoContainer) => {
 renderInfo(tripMainElement);
 
 
-// Функция отрисовки таблицы со списком точек маршрута + сортировка
+// Функция отрисовки таблицы со списком точек маршрута и сортировкой
 const renderTable = (tableContainer, tableEvents) => {
   const eventListComponent = new EventListView();
 
