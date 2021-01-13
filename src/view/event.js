@@ -51,9 +51,21 @@ export default class Event extends AbstractView {
   constructor(event) {
     super();
     this._event = event;
+
+    this._unrollBtnClickHandler = this._unrollBtnClickHandler.bind(this);
   }
 
   _getTemplate() {
     return createEventTemplate(this._event);
+  }
+
+  _unrollBtnClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.unrollBtnClick();
+  }
+
+  setUnrollBtnClickHandler(callback) {
+    this._callback.unrollBtnClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._unrollBtnClickHandler);
   }
 }

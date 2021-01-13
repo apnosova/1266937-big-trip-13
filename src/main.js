@@ -38,36 +38,35 @@ const renderEvent = (eventListElement, event) => {
   };
 
   // Обработчик нажатия клавиши Esc
-  const onEscKeyDown = (evt) => {
+  const escKeyDownHandler = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
       replaceFormToPoint();
-      document.removeEventListener(`keydown`, onEscKeyDown);
+      document.removeEventListener(`keydown`, escKeyDownHandler);
     }
   };
 
-  eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  eventComponent.setUnrollBtnClickHandler(() => {
     replacePointToForm();
-    document.addEventListener(`keydown`, onEscKeyDown);
+    document.addEventListener(`keydown`, escKeyDownHandler);
   });
 
   // Закрытие формы редактирования по стрелке вверх
-  eventEditComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  eventEditComponent.setRollupBtnClickHandler(() => {
     replaceFormToPoint();
-    document.removeEventListener(`keydown`, onEscKeyDown);
+    document.removeEventListener(`keydown`, escKeyDownHandler);
   });
 
-  eventEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
-    evt.preventDefault();
+  eventEditComponent.setFormSubmitHandler(() => {
     replaceFormToPoint();
-    document.removeEventListener(`keydown`, onEscKeyDown);
+    document.removeEventListener(`keydown`, escKeyDownHandler);
   });
 
   render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
 
-// Информация о маршруте и стоимость поездки
+// Функция отрисовки информации о маршруте и стоимости поездки
 const renderInfo = (infoContainer) => {
   const infoComponent = new InfoView();
 
