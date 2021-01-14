@@ -1,27 +1,11 @@
-import {createElement} from "../utils";
+import AbstractView from "./abstract.js";
 
 const createInfoTemplate = () => {
   return `<section class="trip-main__trip-info  trip-info"></section>`;
 };
 
-export default class Info {
-  constructor() {
-    this._element = null;
-  }
-
+export default class Info extends AbstractView {
   _getTemplate() {
     return createInfoTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

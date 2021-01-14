@@ -1,10 +1,12 @@
 import dayjs from "dayjs";
-import {createElement} from "../utils";
+import AbstractView from "./abstract.js";
 
 const createEventTemplate = (event) => {
   const {eventType, destinationCity, time: {start, end, duration}, offers, price, isFavorite, isChecked} = event;
 
-  const favoriteClassName = isFavorite ? `event__favorite-btn--active` : ``;
+  const favoriteClassName = isFavorite
+    ? `event__favorite-btn--active`
+    : ``;
 
   const createOffersTemplate = offers.map((offer) => isChecked ? `<li class="event__offer">
     <span class="event__offer-title">${offer.description} </span>&plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span>
@@ -45,25 +47,25 @@ const createEventTemplate = (event) => {
   </li>`;
 };
 
-export default class Event {
+export default class Event extends AbstractView {
   constructor(event) {
+    super();
     this._event = event;
-    this.element = null;
+
+    this._unrollBtnClickHandler = this._unrollBtnClickHandler.bind(this);
   }
 
   _getTemplate() {
     return createEventTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
+  _unrollBtnClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.unrollBtnClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setUnrollBtnClickHandler(callback) {
+    this._callback.unrollBtnClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._unrollBtnClickHandler);
   }
 }

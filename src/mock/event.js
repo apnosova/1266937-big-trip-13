@@ -1,7 +1,7 @@
 // Точка маршрута
 
 import dayjs from "dayjs";
-import {getRandomIntInclusive} from "../utils.js";
+import {getRandomIntInclusive} from "../utils/common.js";
 import {EVENT_TYPES, DESTINATION_CITIES, OFFERS, DESCRIPTION} from "../constants.js";
 
 // Время и продолжительность нахождения в точке маршрута

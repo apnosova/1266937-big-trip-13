@@ -10,10 +10,16 @@ import EventListView from "./view/event-list.js";
 import NoEventView from "./view/no-event.js";
 import {generateEvent} from "./mock/event.js";
 import {generateFilter} from "./mock/filter.js";
-import {render, RenderPosition} from "./utils.js";
+import {render, RenderPosition, replace} from "./utils/render.js";
 
 
 const EVENT_COUNT = 20;
+
+const Key = {
+  ESC_KEY: `Escape` || `Esc`,
+  ENTER_KEY: `Enter`,
+};
+
 
 const events = new Array(EVENT_COUNT).fill().map(generateEvent).sort((a, b) =>
   a.time.start - b.time.start);
@@ -30,76 +36,75 @@ const renderEvent = (eventListElement, event) => {
   const eventEditComponent = new EventEditView(event);
 
   const replacePointToForm = () => {
-    eventListElement.replaceChild(eventEditComponent.getElement(), eventComponent.getElement());
+    replace(eventEditComponent, eventComponent);
   };
 
   const replaceFormToPoint = () => {
-    eventListElement.replaceChild(eventComponent.getElement(), eventEditComponent.getElement());
+    replace(eventComponent, eventEditComponent);
   };
 
   // Обработчик нажатия клавиши Esc
-  const onEscKeyDown = (evt) => {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
+  const escKeyDownHandler = (evt) => {
+    if (evt.key === Key.ESC_KEY) {
       evt.preventDefault();
       replaceFormToPoint();
-      document.removeEventListener(`keydown`, onEscKeyDown);
+      document.removeEventListener(`keydown`, escKeyDownHandler);
     }
   };
 
-  eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  eventComponent.setUnrollBtnClickHandler(() => {
     replacePointToForm();
-    document.addEventListener(`keydown`, onEscKeyDown);
+    document.addEventListener(`keydown`, escKeyDownHandler);
   });
 
   // Закрытие формы редактирования по стрелке вверх
-  eventEditComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  eventEditComponent.setRollupBtnClickHandler(() => {
     replaceFormToPoint();
-    document.removeEventListener(`keydown`, onEscKeyDown);
+    document.removeEventListener(`keydown`, escKeyDownHandler);
   });
 
-  eventEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
-    evt.preventDefault();
+  eventEditComponent.setFormSubmitHandler(() => {
     replaceFormToPoint();
-    document.removeEventListener(`keydown`, onEscKeyDown);
+    document.removeEventListener(`keydown`, escKeyDownHandler);
   });
 
-  render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
+  render(eventListElement, eventComponent, RenderPosition.BEFOREEND);
 };
 
 
-// Информация о маршруте и стоимость поездки
+// Функция отрисовки информации о маршруте и стоимости поездки
 const renderInfo = (infoContainer) => {
   const infoComponent = new InfoView();
 
-  render(infoContainer, infoComponent.getElement(), RenderPosition.AFTERBEGIN);
-  render(infoComponent.getElement(), new MainInfoView().getElement(), RenderPosition.AFTERBEGIN);
-  render(infoComponent.getElement(), new CostInfoView().getElement(), RenderPosition.BEFOREEND);
+  render(infoContainer, infoComponent, RenderPosition.AFTERBEGIN);
+  render(infoComponent, new MainInfoView(), RenderPosition.AFTERBEGIN);
+  render(infoComponent, new CostInfoView(), RenderPosition.BEFOREEND);
 };
 
 renderInfo(tripMainElement);
 
 
-// Функция отрисовки таблицы со списком точек маршрута + сортировка
+// Функция отрисовки таблицы со списком точек маршрута и сортировкой
 const renderTable = (tableContainer, tableEvents) => {
   const eventListComponent = new EventListView();
 
   // В случае отсутствия точек маршрута вместо списка отображается заглушка
   if (tableEvents.length === 0) {
-    render(tableContainer, new NoEventView().getElement(), RenderPosition.BEFOREEND);
+    render(tableContainer, new NoEventView(), RenderPosition.BEFOREEND);
     return;
   }
 
-  render(tableContainer, new SortView().getElement(), RenderPosition.BEFOREEND);
-  render(tableContainer, eventListComponent.getElement(), RenderPosition.BEFOREEND);
+  render(tableContainer, new SortView(), RenderPosition.BEFOREEND);
+  render(tableContainer, eventListComponent, RenderPosition.BEFOREEND);
 
-  tableEvents.forEach((tableEvent) => renderEvent(eventListComponent.getElement(), tableEvent));
+  tableEvents.forEach((tableEvent) => renderEvent(eventListComponent, tableEvent));
 };
 
 
 // Меню
-render(tripControlsElement, new SiteMenuView().getElement(), RenderPosition.AFTERBEGIN);
+render(tripControlsElement, new SiteMenuView(), RenderPosition.AFTERBEGIN);
 
 // Фильтр
-render(tripControlsElement, new FilterView(filters).getElement(), RenderPosition.BEFOREEND);
+render(tripControlsElement, new FilterView(filters), RenderPosition.BEFOREEND);
 
 renderTable(tripEventsElement, events);
