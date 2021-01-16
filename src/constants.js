@@ -111,3 +111,8 @@ export const DESCRIPTION = {
   ],
   IMAGES: [],
 };
+
+export const Key = {
+  ESC_KEY: `Escape` || `Esc`,
+  ENTER_KEY: `Enter`,
+};
