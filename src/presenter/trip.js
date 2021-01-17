@@ -3,6 +3,7 @@ import EventListView from "../view/event-list.js";
 import NoEventView from "../view/no-event.js";
 
 import EventPresenter from "./event.js";
+import {updateItem} from "../utils/common.js";
 import {render, RenderPosition} from "../utils/render.js";
 
 
@@ -10,9 +11,14 @@ export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
 
+    // Заведем свойство _eventPresenter, где Trip-презентер будет хранить ссылки на все Event-презентеры, будем обращаться по ключу
+    this._eventPresenter = new Map();
+
     this._sortComponent = new SortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView();
+
+    this._handleEventChange = this._handleEventChange.bind(this);
   }
 
   // Метод для инициализации модуля
@@ -23,6 +29,14 @@ export default class Trip {
     this._renderTrip();
   }
 
+  // Метод изменения данных
+  _handleEventChange(updatedEvent) {
+    // Изменяет моки
+    this._tripEvents = updateItem(this._tripEvents, updatedEvent);
+    // Перерисовывает компонент точки маршрута
+    this._eventPresenter.get(updatedEvent.id).init(updatedEvent);
+  }
+
   // Метод для отрисовки сортировки
   _renderSort() {
     render(this._tripContainer, this._sortComponent, RenderPosition.BEFOREEND);
@@ -30,12 +44,14 @@ export default class Trip {
 
   // Логика по созданию компонента точки маршрута выделена в отдельный презентер
   _renderEvent(event) {
-    const eventPresenter = new EventPresenter(this._eventListComponent);
+    const eventPresenter = new EventPresenter(this._eventListComponent, this._handleEventChange);
     eventPresenter.init(event);
+    // Записывает по ключу key (ссылка на презентер) значение value
+    this._eventPresenter.set(event.id, eventPresenter);
   }
 
   // Метод для отрисовки списка задач
-  _renderEvents() {
+  _renderEventList() {
     render(this._tripContainer, this._eventListComponent, RenderPosition.BEFOREEND);
 
     this._tripEvents.forEach((tripEvent) => this._renderEvent(tripEvent));
@@ -44,6 +60,13 @@ export default class Trip {
   // Метод для отрисовки заглушки при отсутствии точек маршрута
   _renderNoEvents() {
     render(this._tripContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _clearEventList() {
+    // Последовательный вызов destroy всех Event - презентеров
+    this._eventPresenter.forEach((presenter) => presenter.destroy());
+    // Удаляет все пары ключ - значение из объекта Map
+    this._eventPresenter.clear();
   }
 
   // Метод для инициализации модуля
@@ -55,6 +78,6 @@ export default class Trip {
     }
 
     this._renderSort();
-    this._renderEvents();
+    this._renderEventList();
   }
 }

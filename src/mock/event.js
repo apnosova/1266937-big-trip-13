@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import {getRandomIntInclusive} from "../utils/common.js";
 import {EVENT_TYPES, DESTINATION_CITIES, OFFERS, DESCRIPTION} from "../constants.js";
 
+import {nanoid} from 'nanoid';
+
 // Время и продолжительность нахождения в точке маршрута
 const generateTime = () => {
   const generateStart = () => {
@@ -109,6 +111,7 @@ export const generateEvent = () => {
   const eventType = generateEventType();
 
   return {
+    id: nanoid(),
     eventType,
     destinationCity: generateDestinationCity(),
     time: generateTime(),
