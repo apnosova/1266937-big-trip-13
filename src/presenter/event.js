@@ -4,14 +4,21 @@ import EventEditView from "../view/event-edit.js";
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
 import {Key} from "../constants.js";
 
+const Mode = {
+  DEFAULT: `DEFAULT`,
+  EDITING: `EDITING`,
+};
+
 
 export default class Event {
-  constructor(eventListContainer, changeData) {
+  constructor(eventListContainer, changeData, changeMode) {
     this._eventListContainer = eventListContainer;
     this._changeData = changeData;
+    this._changeMode = changeMode;
 
     this._eventComponent = null;
     this._eventEditComponent = null;
+    this._mode = Mode.DEFAULT;
 
     this._handleUnrollBtnClick = this._handleUnrollBtnClick.bind(this);
     this._handleFavoriteBtnClick = this._handleFavoriteBtnClick.bind(this);
@@ -47,12 +54,12 @@ export default class Event {
       return;
     }
 
-    // Если компоненты создавались (проверяем их наличие в DOM), то заменяем иx новыми и удаляем
-    if (this._eventListContainer.getElement().contains(prevEventComponent.getElement())) {
+    // Проверка режима для замены компонентов при повторной инициализации
+    if (this._mode === Mode.DEFAULT) {
       replace(this._eventComponent, prevEventComponent);
     }
 
-    if (this._eventListContainer.getElement().contains(prevEventEditComponent.getElement())) {
+    if (this._mode === Mode.EDITING) {
       replace(this._eventEditComponent, prevEventEditComponent);
     }
 
@@ -66,15 +73,25 @@ export default class Event {
     remove(this._eventEditComponent);
   }
 
+  // Метод для смены режима на режим по умолчанию, режим изменяется, если задача была открыта для редактирования
+  resetView() {
+    if (this._mode !== Mode.DEFAULT) {
+      this._replaceFormToPoint();
+    }
+  }
+
   // Замена точки маршрута на форму редактирования и обратно
   _replacePointToForm() {
     replace(this._eventEditComponent, this._eventComponent);
     document.addEventListener(`keydown`, this._escKeyDownHandler);
+    this._changeMode();
+    this._mode = Mode.EDITING;
   }
 
   _replaceFormToPoint() {
     replace(this._eventComponent, this._eventEditComponent);
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
+    this._mode = Mode.DEFAULT;
   }
 
   // Обработчик нажатия клавиши Esc

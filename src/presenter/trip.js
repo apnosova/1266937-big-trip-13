@@ -11,7 +11,7 @@ export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
 
-    // Заведем свойство _eventPresenter, где Trip-презентер будет хранить ссылки на все Event-презентеры, будем обращаться по ключу
+    // Заведем свойство _eventPresenter, где Trip-презентер будет хранить ссылки на все Event-презентеры, будем обращаться по id
     this._eventPresenter = new Map();
 
     this._sortComponent = new SortView();
@@ -19,6 +19,7 @@ export default class Trip {
     this._noEventComponent = new NoEventView();
 
     this._handleEventChange = this._handleEventChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   // Метод для инициализации модуля
@@ -27,6 +28,11 @@ export default class Trip {
 
     // Метод инициализации вызывает метод для отрисовки таблицы со списком точек маршрута
     this._renderTrip();
+  }
+
+  // Метод уведомления всех презентеров о смене режима
+  _handleModeChange() {
+    this._eventPresenter.forEach((presenter) => presenter.resetView());
   }
 
   // Метод изменения данных
@@ -44,7 +50,7 @@ export default class Trip {
 
   // Логика по созданию компонента точки маршрута выделена в отдельный презентер
   _renderEvent(event) {
-    const eventPresenter = new EventPresenter(this._eventListComponent, this._handleEventChange);
+    const eventPresenter = new EventPresenter(this._eventListComponent, this._handleEventChange, this._handleModeChange);
     eventPresenter.init(event);
     // Записывает по ключу key (ссылка на презентер) значение value
     this._eventPresenter.set(event.id, eventPresenter);
