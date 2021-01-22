@@ -98,6 +98,7 @@ export default class Event {
   _escKeyDownHandler(evt) {
     if (evt.key === Key.ESC_KEY) {
       evt.preventDefault();
+      this._eventEditComponent.reset(this._event); // выход без редактирования
       this._replaceFormToPoint();
     }
   }

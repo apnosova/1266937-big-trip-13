@@ -68,18 +68,18 @@ const generateEventType = () => {
 };
 
 // Дополнительные опции
-const generateOffers = (type) => {
+export const generateOffers = (type) => {
   const offers = OFFERS.filter((offer) => offer.type === type);
 
   return offers;
 };
 
 // Пункт назначения (город)
-const generateDestinationCity = () => {
-  const randomIndex = getRandomIntInclusive(0, DESTINATION_CITIES.length - 1);
+//const generateDestinationCity = () => {
+//  const randomIndex = getRandomIntInclusive(0, DESTINATION_CITIES.length - 1);
 
-  return DESTINATION_CITIES[randomIndex];
-};
+//  return DESTINATION_CITIES[randomIndex];
+//};
 
 // Информация о месте назначения
 const generateDescription = () => {
@@ -101,6 +101,20 @@ const generateDescription = () => {
   return description;
 };
 
+// Привязка описания к городу
+const generateDestination = () => {
+  const Obj = {...DESTINATION_CITIES}
+
+  const destinations = Object
+    .entries(Obj)
+    .map(entry => ({city: entry[1]}));
+
+  destinations.forEach(el => el[`description`] = generateDescription())
+  const randomIndex = getRandomIntInclusive(0, destinations.length - 1);
+
+  return destinations[randomIndex];
+};
+
 const generatePrice = () => {
   const price = getRandomIntInclusive(20, 1000);
 
@@ -113,12 +127,11 @@ export const generateEvent = () => {
   return {
     id: nanoid(),
     eventType,
-    destinationCity: generateDestinationCity(),
+    // destinationCity: generateDestinationCity(),
     time: generateTime(),
-    offers: generateOffers(eventType),
-    description: generateDescription(),
+    // offers: generateOffers(eventType),
+    destination: generateDestination(),
     isFavorite: Boolean(getRandomIntInclusive(0, 1)),
     price: generatePrice(),
-    isChecked: Boolean(getRandomIntInclusive(0, 1)),
   };
 };
