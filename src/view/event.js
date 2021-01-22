@@ -1,29 +1,38 @@
-import dayjs from "dayjs";
+import {formatEventDay, formatEventTime, formatMachineDate} from "../utils/event.js";
+import {OFFERS} from "../constants.js";
 import AbstractView from "./abstract.js";
 
 const createEventTemplate = (event) => {
-  const {eventType, destinationCity, time: {start, end, duration}, offers, price, isFavorite, isChecked} = event;
+  const {eventType, destination: {city}, time: {start, end, duration}, price, isFavorite} = event;
 
   const favoriteClassName = isFavorite
     ? `event__favorite-btn--active`
     : ``;
 
-  const createOffersTemplate = offers.map((offer) => isChecked ? `<li class="event__offer">
+  const createCurrentOffers = (type) => {
+    const currentOffers = OFFERS.filter((offer) => offer.type === type);
+
+    return currentOffers;
+  };
+
+  const currentOffers = createCurrentOffers(eventType);
+
+  const createOfferListTemplate = currentOffers.map((offer) => offer.isChecked ? `<li class="event__offer">
     <span class="event__offer-title">${offer.description} </span>&plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span>
   </li>` : ``).join(``);
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="2019-03-18">${dayjs(start).format(`MMM DD`)}</time>
+      <time class="event__date" datetime="2019-03-18">${formatEventDay(start)}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${eventType} ${destinationCity}</h3>
+      <h3 class="event__title">${eventType} ${city}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${dayjs(start).format(`YYYY-MM-DDTHH:mm`)}">${dayjs(start).format(`HH:mm`)}</time>
+          <time class="event__start-time" datetime="${formatMachineDate(start)}">${formatEventTime(start)}</time>
           &mdash;
-          <time class="event__end-time" datetime="${dayjs(end).format(`YYYY-MM-DDTHH:mm`)}">${dayjs(end).format(`HH:mm`)}</time>
+          <time class="event__end-time" datetime="${formatMachineDate(end)}">${formatEventTime(end)}</time>
         </p>
         <p class="event__duration">${duration}</p>
       </div>
@@ -32,7 +41,7 @@ const createEventTemplate = (event) => {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${createOffersTemplate}
+        ${createOfferListTemplate}
       </ul>
       <button class="event__favorite-btn ${favoriteClassName}" type="button">
         <span class="visually-hidden">Add to favorite</span>
