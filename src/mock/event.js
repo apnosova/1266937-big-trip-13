@@ -75,11 +75,11 @@ export const generateOffers = (type) => {
 };
 
 // Пункт назначения (город)
-//const generateDestinationCity = () => {
+// const generateDestinationCity = () => {
 //  const randomIndex = getRandomIntInclusive(0, DESTINATION_CITIES.length - 1);
 
 //  return DESTINATION_CITIES[randomIndex];
-//};
+// };
 
 // Информация о месте назначения
 const generateDescription = () => {
@@ -103,13 +103,17 @@ const generateDescription = () => {
 
 // Привязка описания к городу
 const generateDestination = () => {
-  const Obj = {...DESTINATION_CITIES}
+  // const Obj = {...DESTINATION_CITIES}
+  const Obj = Object.assign({}, DESTINATION_CITIES);
 
   const destinations = Object
     .entries(Obj)
-    .map(entry => ({city: entry[1]}));
+    .map((entry) => ({city: entry[1]}));
 
-  destinations.forEach(el => el[`description`] = generateDescription())
+  destinations.forEach(function (el) {
+    el[`description`] = generateDescription();
+  });
+
   const randomIndex = getRandomIntInclusive(0, destinations.length - 1);
 
   return destinations[randomIndex];
