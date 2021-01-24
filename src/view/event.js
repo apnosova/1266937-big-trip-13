@@ -1,9 +1,10 @@
-import {formatEventDay, formatEventTime, formatMachineDate} from "../utils/event.js";
+import {formatEventDay, formatEventTime, formatMachineDate, generateDuration} from "../utils/event.js";
 import {OFFERS} from "../constants.js";
 import AbstractView from "./abstract.js";
+import dayjs from "dayjs";
 
 const createEventTemplate = (event) => {
-  const {eventType, destination: {city}, time: {start, end, duration}, price, isFavorite} = event;
+  const {eventType, city, startTime, endTime, price, isFavorite} = event;
 
   const favoriteClassName = isFavorite
     ? `event__favorite-btn--active`
@@ -21,18 +22,20 @@ const createEventTemplate = (event) => {
     <span class="event__offer-title">${offer.description} </span>&plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span>
   </li>` : ``).join(``);
 
+  const duration = generateDuration(startTime, endTime);
+
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="2019-03-18">${formatEventDay(start)}</time>
+      <time class="event__date" datetime="${dayjs(startTime).format(`YYYY-MM-DD`)}">${formatEventDay(startTime)}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${eventType} ${city}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${formatMachineDate(start)}">${formatEventTime(start)}</time>
+          <time class="event__start-time" datetime="${formatMachineDate(startTime)}">${formatEventTime(startTime)}</time>
           &mdash;
-          <time class="event__end-time" datetime="${formatMachineDate(end)}">${formatEventTime(end)}</time>
+          <time class="event__end-time" datetime="${formatMachineDate(endTime)}">${formatEventTime(endTime)}</time>
         </p>
         <p class="event__duration">${duration}</p>
       </div>

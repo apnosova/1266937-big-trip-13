@@ -2,63 +2,27 @@
 
 import dayjs from "dayjs";
 import {getRandomIntInclusive} from "../utils/common.js";
-import {EVENT_TYPES, DESTINATION_CITIES, OFFERS, DESCRIPTION} from "../constants.js";
+import {EVENT_TYPES, DESTINATION_CITIES, DESCRIPTION} from "../constants.js";
 
 import {nanoid} from 'nanoid';
 
 // Время и продолжительность нахождения в точке маршрута
-const generateTime = () => {
-  const generateStart = () => {
-    const maxGapInMins = 10080;
-    const gapInMins = getRandomIntInclusive(-maxGapInMins, maxGapInMins);
-    const start = dayjs().add(gapInMins, `minute`);
+const generateStart = () => {
+  const maxGapInMins = 10080;
+  const gapInMins = getRandomIntInclusive(-maxGapInMins, maxGapInMins);
+  const start = dayjs().add(gapInMins, `minute`);
 
-    return start;
-  };
-
-  const start = generateStart();
-
-  const generateEnd = () => {
-    const maxDurationInMins = 4320;
-    const durationGap = getRandomIntInclusive(0, maxDurationInMins);
-    const end = start.add(durationGap, `minute`);
-
-    return end;
-  };
-
-  const end = generateEnd();
-
-  const generateDuration = () => {
-    const HOURS_IN_DAY = 24;
-    const MINS_IN_HOUR = 60;
-
-    const durationInDays = end.diff(start, `day`, true); // без округления
-    const days = Math.trunc(durationInDays);
-    const durationInHours = (durationInDays - days) * HOURS_IN_DAY;
-    const hours = Math.trunc(durationInHours);
-    const minutes = Math.trunc((durationInHours - hours) * MINS_IN_HOUR);
-
-    let duration;
-
-    if (!days && !hours) {
-      duration = minutes.toString().padStart(2, 0) + `M`;
-    } else if (hours && !days) {
-      duration = hours.toString().padStart(2, 0) + `H ` + minutes.toString().padStart(2, 0) + `M`;
-    } else {
-      duration = days.toString().padStart(2, 0) + `D ` + hours.toString().padStart(2, 0) + `H ` + minutes.toString().padStart(2, 0) + `M`;
-    }
-
-    return duration;
-  };
-
-  const time = {
-    start,
-    end,
-    duration: generateDuration(),
-  };
-
-  return time;
+  return start;
 };
+
+const generateEnd = (startTime) => {
+  const maxDurationInMins = 4320;
+  const durationGap = getRandomIntInclusive(0, maxDurationInMins);
+  const end = startTime.add(durationGap, `minute`);
+
+  return end;
+};
+
 
 // Тип точки маршрута
 const generateEventType = () => {
@@ -68,55 +32,39 @@ const generateEventType = () => {
 };
 
 // Дополнительные опции
-export const generateOffers = (type) => {
-  const offers = OFFERS.filter((offer) => offer.type === type);
+// const generateOffers = (type) => {
+// const offers = OFFERS.filter((offer) => offer.type === type);
 
-  return offers;
-};
-
-// Пункт назначения (город)
-// const generateDestinationCity = () => {
-//  const randomIndex = getRandomIntInclusive(0, DESTINATION_CITIES.length - 1);
-
-//  return DESTINATION_CITIES[randomIndex];
+// return offers;
 // };
 
-// Информация о месте назначения
-const generateDescription = () => {
-  const generateText = () => {
-    return DESCRIPTION.TEXTS[getRandomIntInclusive(0, DESCRIPTION.TEXTS.length - 1)];
-  };
-  const texts = new Array(getRandomIntInclusive(1, 5)).fill().map(generateText).join(` `);
+// Пункт назначения (город)
+const generateDestinationCity = () => {
+  const randomIndex = getRandomIntInclusive(0, DESTINATION_CITIES.length - 1);
 
-  const generateImage = () => {
-    return `http://picsum.photos/248/152?r=` + getRandomIntInclusive(1, 10000);
-  };
-  const images = new Array(getRandomIntInclusive(1, 5)).fill().map(generateImage);
-
-  const description = {
-    texts,
-    images,
-  };
-
-  return description;
+  return DESTINATION_CITIES[randomIndex];
 };
 
-// Привязка описания к городу
-const generateDestination = () => {
-  // const Obj = {...DESTINATION_CITIES}
-  const Obj = Object.assign({}, DESTINATION_CITIES);
+// Информация о месте назначения
+const generateText = () => {
+  const generateRandomText = () => {
 
-  const destinations = Object
-    .entries(Obj)
-    .map((entry) => ({city: entry[1]}));
+    return DESCRIPTION.TEXTS[getRandomIntInclusive(0, DESCRIPTION.TEXTS.length - 1)];
+  };
 
-  destinations.forEach(function (el) {
-    el[`description`] = generateDescription();
-  });
+  const text = new Array(getRandomIntInclusive(1, 5)).fill().map(generateRandomText).join(` `);
 
-  const randomIndex = getRandomIntInclusive(0, destinations.length - 1);
+  return text;
+};
 
-  return destinations[randomIndex];
+const generateImages = () => {
+  const generateRandomImage = () => {
+    return `http://picsum.photos/248/152?r=` + getRandomIntInclusive(1, 10000);
+  };
+
+  const images = new Array(getRandomIntInclusive(1, 5)).fill().map(generateRandomImage);
+
+  return images;
 };
 
 const generatePrice = () => {
@@ -127,14 +75,16 @@ const generatePrice = () => {
 
 export const generateEvent = () => {
   const eventType = generateEventType();
+  const startTime = generateStart();
 
   return {
     id: nanoid(),
     eventType,
-    // destinationCity: generateDestinationCity(),
-    time: generateTime(),
-    // offers: generateOffers(eventType),
-    destination: generateDestination(),
+    startTime,
+    endTime: generateEnd(startTime),
+    city: generateDestinationCity(),
+    text: generateText(),
+    images: generateImages(),
     isFavorite: Boolean(getRandomIntInclusive(0, 1)),
     price: generatePrice(),
   };

@@ -13,7 +13,7 @@ import {render, RenderPosition} from "./utils/render.js";
 const EVENT_COUNT = 20;
 
 const events = new Array(EVENT_COUNT).fill().map(generateEvent).sort((a, b) =>
-  a.time.start - b.time.start);
+  a.startTime - b.startTime);
 const filters = generateFilter();
 
 const tripMainElement = document.querySelector(`.trip-main`);
