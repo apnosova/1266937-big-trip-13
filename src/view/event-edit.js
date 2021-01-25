@@ -2,15 +2,21 @@ import {EVENT_TYPES, DESTINATION_CITIES, OFFERS} from "../constants.js";
 import {capitalizeFirstLetter} from "../utils/common.js";
 import SmartView from "./smart.js";
 import dayjs from "dayjs";
+import {generateDescription, generateImages} from "../mock/event.js";
+
+import flatpickr from "flatpickr";
+
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const BLANK_EVENT = {
   eventType: EVENT_TYPES[0],
   city: ``,
-  start: dayjs().format(`DD/MM/YY HH:mm`),
-  end: dayjs().format(`DD/MM/YY HH:mm`),
+  startTime: dayjs().format(`DD/MM/YY HH:mm`),
+  endTime: dayjs().format(`DD/MM/YY HH:mm`),
   price: ``,
   offers: ``,
-  description: ``,
+  text: ``,
+  images: ``,
 };
 
 const createEventTypeListTemplate = (currentType, eventTypes) => {
@@ -51,11 +57,11 @@ const createOfferListTemplate = (eventType) => {
   </section>` : ``}`;
 };
 
-const createDestinationTemplate = (texts, images) => {
+const createDestinationTemplate = (description, images) => {
 
-  return `${texts.length !== 0 ? `<section class="event__section  event__section--destination">
+  return `${description !== 0 ? `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-    <p class="event__destination-description">${texts}</p>
+    <p class="event__destination-description">${description}</p>
 
     <div class="event__photos-container">
       <div class="event__photos-tape">
@@ -66,15 +72,22 @@ const createDestinationTemplate = (texts, images) => {
 };
 
 const createEventEditTemplate = (data) => {
-  const {eventType, destination: {city}, destination: {description: {texts, images}}, time: {start, end}, price} = data;
+  const {
+    eventType,
+    city,
+    description,
+    images,
+    startTime,
+    endTime,
+    price,
+  } = data;
 
   const eventTypeListTemplate = createEventTypeListTemplate(eventType, EVENT_TYPES);
-
-  const cityListTemplate = createCityListTemplate();
-
   const offerListTemplate = createOfferListTemplate(eventType);
+  const cityListTemplate = createCityListTemplate();
+  const destinationTemplate = createDestinationTemplate(description, images);
 
-  const destinationTemplate = createDestinationTemplate(texts, images);
+  const isSubmitDisabled = (startTime === ``);
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -108,11 +121,11 @@ const createEventEditTemplate = (data) => {
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
           <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time"
-          value="${dayjs(start).format(`DD/MM/YY HH:mm`)}">
+          value="${dayjs(startTime).format(`DD/MM/YY HH:mm`)}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
           <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time"
-          value="${dayjs(end).format(`DD/MM/YY HH:mm`)}">
+          value="${dayjs(endTime).format(`DD/MM/YY HH:mm`)}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -123,7 +136,7 @@ const createEventEditTemplate = (data) => {
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? `disabled` : ``}>Save</button>
         <button class="event__reset-btn" type="reset">Delete</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -142,14 +155,21 @@ export default class EventEdit extends SmartView {
   constructor(event = BLANK_EVENT) {
     super();
     this._data = EventEdit.parseEventToData(event); // Описание задачи + внутреннее состояние для компонента
+    this._startTimePicker = null;
+    this._endTimePicker = null;
 
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._eventTypeChangeHandler = this._eventTypeChangeHandler.bind(this);
+    // this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._priceInputHandler = this._priceInputHandler.bind(this);
+    this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
+    this._endTimeChangeHandler = this._endTimeChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setStartTimePicker();
+    this._setEndTimePicker();
   }
 
   // Выход из редактирования без сохранения
@@ -165,12 +185,51 @@ export default class EventEdit extends SmartView {
   restoreHandlers() {
     this._setInnerHandlers();
     this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
+    this._setStartTimePicker();
+    this._setEndTimePicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
+  }
+
+  _setStartTimePicker() {
+    // В случае обновления компонента удаляем вспомогательные DOM-элементы, которые создает flatpickr при инициализации
+    if (this._startTimePicker) {
+      this._startTimePicker.destroy();
+      this._startTimePicker = null;
+    }
+
+    this._startTimePicker = flatpickr(this.getElement().querySelector(`#event-start-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: dayjs(this._data.startTime).toDate(),
+          enableTime: true,
+          time_24hr: true,  /* eslint-disable-line */
+          onChange: this._startTimeChangeHandler
+        }
+    );
+  }
+
+  _setEndTimePicker() {
+    if (this._endTimePicker) {
+      this._endTimePicker.destroy();
+      this._endTimePicker = null;
+    }
+
+    this._endTimePicker = flatpickr(this.getElement().querySelector(`#event-end-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: dayjs(this._data.endTime).toDate(),
+          enableTime: true,
+          time_24hr: true,  /* eslint-disable-line */
+          // minDate: new Date(),
+          onChange: this._endTimeChangeHandler
+        }
+    );
   }
 
   // Навешивает внутренние обработчики
   _setInnerHandlers() {
     this.getElement().querySelector(`.event__type-group`).addEventListener(`change`, this._eventTypeChangeHandler);
+    // this.getElement().querySelector(`.event__section--offers`).addEventListener(`change`, this._offersChangeHandler);
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._destinationChangeHandler);
     this.getElement().querySelector(`.event__input--price`).addEventListener(`input`, this._priceInputHandler);
   }
@@ -188,11 +247,28 @@ export default class EventEdit extends SmartView {
     });
   }
 
+  _startTimeChangeHandler([userDate]) {
+    this.updateData({
+      startTime: dayjs(userDate).second(59).toDate(),
+    }, true
+    );
+  }
+
+  _endTimeChangeHandler([userDate]) {
+    this.updateData({
+      endTime: dayjs(userDate).second(59).toDate(),
+    }, true
+    );
+  }
+
+
   _destinationChangeHandler(evt) {
     evt.preventDefault();
     this.updateData({
       city: evt.target.value,
-    }, true);
+      description: generateDescription(),
+      images: generateImages(),
+    });
   }
 
   _priceInputHandler(evt) {

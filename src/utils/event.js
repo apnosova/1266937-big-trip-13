@@ -11,3 +11,40 @@ export const formatEventTime = (time) => {
 export const formatMachineDate = (date) => {
   return dayjs(date).format(`YYYY-MM-DDTHH:mm`);
 };
+
+export const generateDuration = (startTime, endTime) => {
+  const HOURS_IN_DAY = 24;
+  const MINS_IN_HOUR = 60;
+
+  const durationInDays = dayjs(endTime).diff(dayjs(startTime), `day`, true); // без округления
+  const days = Math.trunc(durationInDays);
+  const durationInHours = (durationInDays - days) * HOURS_IN_DAY;
+  const hours = Math.trunc(durationInHours);
+  const minutes = Math.trunc((durationInHours - hours) * MINS_IN_HOUR);
+  let duration;
+
+  if (!days && !hours) {
+    duration = minutes.toString().padStart(2, 0) + `M`;
+  } else if (hours && !days) {
+    duration = hours.toString().padStart(2, 0) + `H ` + minutes.toString().padStart(2, 0) + `M`;
+  } else {
+    duration = days.toString().padStart(2, 0) + `D ` + hours.toString().padStart(2, 0) + `H ` + minutes.toString().padStart(2, 0) + `M`;
+  }
+
+  return duration;
+};
+
+// Сортировка (по дате, по длительности и по цене, по убыванию)
+export const sortEventByDay = (eventA, eventB) => {
+
+  return dayjs(eventB.startTime).diff(dayjs(eventA.startTime));
+};
+
+export const sortEventByTime = (eventA, eventB) => {
+
+  return dayjs(eventB.endTime).diff(dayjs(eventB.startTime)) - dayjs(eventA.endTime).diff(dayjs(eventA.startTime));
+};
+
+export const sortEventByPrice = (eventA, eventB) => {
+  return eventB.price - eventA.price;
+};
