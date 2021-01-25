@@ -46,18 +46,18 @@ const generateDestinationCity = () => {
 };
 
 // Информация о месте назначения
-const generateText = () => {
-  const generateRandomText = () => {
+export const generateDescription = () => {
+  const generateRandomDescription = () => {
 
     return DESCRIPTION.TEXTS[getRandomIntInclusive(0, DESCRIPTION.TEXTS.length - 1)];
   };
 
-  const text = new Array(getRandomIntInclusive(1, 5)).fill().map(generateRandomText).join(` `);
+  const description = new Array(getRandomIntInclusive(1, 5)).fill().map(generateRandomDescription).join(` `);
 
-  return text;
+  return description;
 };
 
-const generateImages = () => {
+export const generateImages = () => {
   const generateRandomImage = () => {
     return `http://picsum.photos/248/152?r=` + getRandomIntInclusive(1, 10000);
   };
@@ -83,7 +83,7 @@ export const generateEvent = () => {
     startTime,
     endTime: generateEnd(startTime),
     city: generateDestinationCity(),
-    text: generateText(),
+    description: generateDescription(),
     images: generateImages(),
     isFavorite: Boolean(getRandomIntInclusive(0, 1)),
     price: generatePrice(),

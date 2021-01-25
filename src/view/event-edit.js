@@ -2,6 +2,7 @@ import {EVENT_TYPES, DESTINATION_CITIES, OFFERS} from "../constants.js";
 import {capitalizeFirstLetter} from "../utils/common.js";
 import SmartView from "./smart.js";
 import dayjs from "dayjs";
+import {generateDescription, generateImages} from "../mock/event.js";
 
 import flatpickr from "flatpickr";
 
@@ -56,11 +57,11 @@ const createOfferListTemplate = (eventType) => {
   </section>` : ``}`;
 };
 
-const createDestinationTemplate = (text, images) => {
+const createDestinationTemplate = (description, images) => {
 
-  return `${text !== 0 ? `<section class="event__section  event__section--destination">
+  return `${description !== 0 ? `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-    <p class="event__destination-description">${text}</p>
+    <p class="event__destination-description">${description}</p>
 
     <div class="event__photos-container">
       <div class="event__photos-tape">
@@ -74,7 +75,7 @@ const createEventEditTemplate = (data) => {
   const {
     eventType,
     city,
-    text,
+    description,
     images,
     startTime,
     endTime,
@@ -84,8 +85,7 @@ const createEventEditTemplate = (data) => {
   const eventTypeListTemplate = createEventTypeListTemplate(eventType, EVENT_TYPES);
   const offerListTemplate = createOfferListTemplate(eventType);
   const cityListTemplate = createCityListTemplate();
-  const destinationTemplate = createDestinationTemplate(text, images);
-
+  const destinationTemplate = createDestinationTemplate(description, images);
 
   const isSubmitDisabled = (startTime === ``);
 
@@ -161,7 +161,7 @@ export default class EventEdit extends SmartView {
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._eventTypeChangeHandler = this._eventTypeChangeHandler.bind(this);
-    // this._offersChangeHandler = this._offersChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._priceInputHandler = this._priceInputHandler.bind(this);
     this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
@@ -262,17 +262,17 @@ export default class EventEdit extends SmartView {
   }
 
   //  _offersChangeHandler(evt) {
-  // evt.preventDefault();
-  // this.updateData({
+  //  evt.preventDefault();
 
-  //  )
   // });
-  //  }
+  // }
 
   _destinationChangeHandler(evt) {
     evt.preventDefault();
     this.updateData({
       city: evt.target.value,
+      description: generateDescription(),
+      images: generateImages(),
     });
   }
 
