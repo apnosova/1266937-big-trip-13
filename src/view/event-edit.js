@@ -161,7 +161,7 @@ export default class EventEdit extends SmartView {
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._eventTypeChangeHandler = this._eventTypeChangeHandler.bind(this);
-    this._offersChangeHandler = this._offersChangeHandler.bind(this);
+    // this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._priceInputHandler = this._priceInputHandler.bind(this);
     this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
@@ -261,11 +261,6 @@ export default class EventEdit extends SmartView {
     );
   }
 
-  //  _offersChangeHandler(evt) {
-  //  evt.preventDefault();
-
-  // });
-  // }
 
   _destinationChangeHandler(evt) {
     evt.preventDefault();
