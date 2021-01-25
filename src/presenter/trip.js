@@ -5,21 +5,23 @@ import NoEventView from "../view/no-event.js";
 import EventPresenter from "./event.js";
 import {updateItem} from "../utils/common.js";
 import {render, RenderPosition} from "../utils/render.js";
+import {sortEventByDay, sortEventByTime, sortEventByPrice} from "../utils/event.js";
+import {SortType} from "../constants.js";
 
 
 export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
-
     // Заведем свойство _eventPresenter, где Trip-презентер будет хранить ссылки на все Event-презентеры, будем обращаться по id
     this._eventPresenter = new Map();
-
     this._sortComponent = new SortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView();
+    this._currentSortType = SortType.DEFAULT; // Сортировка по умолчанию - по дате
 
     this._handleEventChange = this._handleEventChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
   // Метод для инициализации модуля
@@ -43,16 +45,44 @@ export default class Trip {
     this._eventPresenter.get(updatedEvent.id).init(updatedEvent);
   }
 
+  _sortEvents(sortType) {
+    switch (sortType) {
+      case SortType.TIME:
+        this._tripEvents.sort(sortEventByTime);
+        break;
+      case SortType.PRICE:
+        this._tripEvents.sort(sortEventByPrice);
+        break;
+      default:
+        this._tripEvents.sort(sortEventByDay);
+    }
+
+    this._currentSortType = sortType;
+  }
+
+  // Сортируем задачи, очищаем список, рендерим список заново
+  _handleSortTypeChange(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+
+    this._sortEvents(sortType);
+    this._clearEventList();
+    this._renderEventList();
+  }
+
   // Метод для отрисовки сортировки
   _renderSort() {
     render(this._tripContainer, this._sortComponent, RenderPosition.BEFOREEND);
+
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
   // Логика по созданию компонента точки маршрута выделена в отдельный презентер
   _renderEvent(event) {
     const eventPresenter = new EventPresenter(this._eventListComponent, this._handleEventChange, this._handleModeChange);
     eventPresenter.init(event);
-    // Записывает по ключу key (ссылка на презентер) значение value
+    // Записывает по ключу key = id значение value
     this._eventPresenter.set(event.id, eventPresenter);
   }
 
