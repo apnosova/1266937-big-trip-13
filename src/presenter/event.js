@@ -2,7 +2,7 @@ import EventView from "../view/event.js";
 import EventEditView from "../view/event-edit.js";
 
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
-import {Key} from "../constants.js";
+import {Key, UserAction, UpdateType} from "../constants.js";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -112,11 +112,25 @@ export default class Event {
   }
 
   _handleFavoriteBtnClick() {
-    this._changeData(Object.assign({}, this._event, {isFavorite: !this._event.isFavorite}));
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        UpdateType.MINOR,
+        Object.assign(
+            {},
+            this._event,
+            {
+              isFavorite: !this._event.isFavorite
+            }
+        )
+    );
   }
 
   _handleFormSubmit(event) {
-    this._changeData(event);
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        UpdateType.MINOR,
+        event);
+
     this._replaceFormToPoint();
   }
 }
