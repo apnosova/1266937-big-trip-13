@@ -5,12 +5,14 @@ import NoEventView from "../view/no-event.js";
 import EventPresenter from "./event.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {sortEventByDay, sortEventByTime, sortEventByPrice} from "../utils/event.js";
+import {filter} from "../utils/filter.js";
 import {SortType, UserAction, UpdateType} from "../constants.js";
 
 
 export default class Trip {
-  constructor(tripContainer, eventsModel) {
+  constructor(tripContainer, eventsModel, filterModel) {
     this._eventsModel = eventsModel;
+    this._filterModel = filterModel;
     this._tripContainer = tripContainer;
     // Заведем свойство _eventPresenter, где Trip-презентер будет хранить ссылки на все Event-презентеры, будем обращаться по id
     this._eventPresenter = new Map();
@@ -26,6 +28,7 @@ export default class Trip {
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
 
     this._eventsModel.addObserver(this._handleModelEvent); // Обработка уведомлений от модели
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   // Метод для инициализации модуля
@@ -36,14 +39,19 @@ export default class Trip {
 
   // Получение данных из модели учитывает выбранную сортировку
   _getEvents() {
+    const filterType = this._filterModel.getFilter();
+    const events = this._eventsModel.getEvents();
+    // const filtredEvents = filter[filterType](events);
+    const filtredEvents = filter[filterType](events);
+
     switch (this._currentSortType) {
       case SortType.TIME:
-        return this._eventsModel.getEvents().slice().sort(sortEventByTime);
+        return filtredEvents.sort(sortEventByTime);
       case SortType.PRICE:
-        return this._eventsModel.getEvents().slice().sort(sortEventByPrice);
+        return filtredEvents.sort(sortEventByPrice);
+      default:
+        return filtredEvents.sort(sortEventByDay);
     }
-
-    return this._eventsModel.getEvents().slice().sort(sortEventByDay);
   }
 
   // Метод уведомления всех презентеров о смене режима
@@ -146,13 +154,6 @@ export default class Trip {
   _renderNoEvents() {
     render(this._tripContainer, this._noEventComponent, RenderPosition.BEFOREEND);
   }
-
-  //_clearEventList() {
-  //  // Последовательный вызов destroy всех Event - презентеров
-  //  this._eventPresenter.forEach((presenter) => presenter.destroy());
-  //  // Удаляет все пары ключ - значение из объекта Map
-  //  this._eventPresenter.clear();
-  //}
 
   // Метод для инициализации модуля
   // Метод для отрисовки таблицы со списком точек маршрута и сортировкой

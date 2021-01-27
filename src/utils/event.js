@@ -1,4 +1,7 @@
 import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrBefore);
 
 export const formatEventDay = (day) => {
   return dayjs(day).format(`MMM DD`);
@@ -10,6 +13,18 @@ export const formatEventTime = (time) => {
 
 export const formatMachineDate = (date) => {
   return dayjs(date).format(`YYYY-MM-DDTHH:mm`);
+};
+
+// дата начала события больше или равна текущей дате
+export const isFutureEvent = (startTime) => {
+  return dayjs().isSameOrBefore(startTime, `D`);
+};
+
+// dayjs('2010-10-20').isSameOrBefore('2010-10-19', 'year')
+
+//  дата окончания маршрута меньше, чем текущая
+export const isPastEvent = (startTime) => {
+  return dayjs().isAfter(startTime, `D`);
 };
 
 export const generateDuration = (startTime, endTime) => {
