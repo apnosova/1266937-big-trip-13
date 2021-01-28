@@ -11,7 +11,7 @@ export default class Observer {
     this._observers = this._observers.filter((exitedObserver) => exitedObserver !== observer);
   }
 
-  _notify(type, payload) { // Тип события, полезная нагрузка
+  notify(type, payload) { // Тип события, полезная нагрузка
     this._observers.forEach((observer) => observer(type, payload));
   }
 }

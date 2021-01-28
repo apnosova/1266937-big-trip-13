@@ -3,6 +3,7 @@ import EventEditView from "../view/event-edit.js";
 
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
 import {Key, UserAction, UpdateType} from "../constants.js";
+import {isDatesEqual} from "../utils/event.js";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -24,6 +25,7 @@ export default class Event {
     this._handleFavoriteBtnClick = this._handleFavoriteBtnClick.bind(this);
     this._handleRollupBtnClick = this._handleRollupBtnClick.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
@@ -47,6 +49,9 @@ export default class Event {
 
     // Закрытие формы редактирования по нажатию на кнопку Сохранить
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
+
+    // Удаление точки маршрута
+    this._eventEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     // Если компоненты не создавались, то отрисовываем
     if (prevEventComponent === null || prevEventEditComponent === null) {
@@ -114,7 +119,7 @@ export default class Event {
   _handleFavoriteBtnClick() {
     this._changeData(
         UserAction.UPDATE_EVENT,
-        UpdateType.MINOR,
+        UpdateType.PATCH,
         Object.assign(
             {},
             this._event,
@@ -125,12 +130,25 @@ export default class Event {
     );
   }
 
-  _handleFormSubmit(event) {
+  _handleFormSubmit(update) {
+    const isMinorUpdate =
+      !isDatesEqual(this._event.startTime, update.startTime) ||
+      !isDatesEqual(this._event.endTime, update.endTime) ||
+      this._event.price !== update.price;
+
     this._changeData(
         UserAction.UPDATE_EVENT,
-        UpdateType.MINOR,
-        event);
+        isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+        update);
 
     this._replaceFormToPoint();
+  }
+
+  _handleDeleteClick(event) {
+    this._changeData(
+        UserAction.DELETE_EVENT,
+        UpdateType.MINOR,
+        event
+    );
   }
 }

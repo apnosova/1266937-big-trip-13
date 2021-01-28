@@ -10,7 +10,7 @@ export default class Filter extends Observer {
 
   setFilter(updateType, filter) {
     this._activeFilter = filter;
-    this._notify(updateType, filter); // Вместе с уведомлением модель присылает активный фильтр
+    this.notify(updateType, filter); // Вместе с уведомлением модель присылает активный фильтр
   }
 
   getFilter() {

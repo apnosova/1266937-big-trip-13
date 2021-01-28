@@ -3,10 +3,11 @@ import EventListView from "../view/event-list.js";
 import NoEventView from "../view/no-event.js";
 
 import EventPresenter from "./event.js";
+import EventNewPresenter from "./event-new.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {sortEventByDay, sortEventByTime, sortEventByPrice} from "../utils/event.js";
 import {filter} from "../utils/filter.js";
-import {SortType, UserAction, UpdateType} from "../constants.js";
+import {SortType, UserAction, UpdateType, FilterType} from "../constants.js";
 
 
 export default class Trip {
@@ -29,6 +30,8 @@ export default class Trip {
 
     this._eventsModel.addObserver(this._handleModelEvent); // Обработка уведомлений от модели
     this._filterModel.addObserver(this._handleModelEvent);
+
+    this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._handleViewAction);
   }
 
   // Метод для инициализации модуля
@@ -37,25 +40,31 @@ export default class Trip {
     this._renderTrip();
   }
 
+  createNewEvent() {
+    this._currentSortType = SortType.DAY;
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this._eventNewPresenter.init();
+  }
+
   // Получение данных из модели учитывает выбранную сортировку
   _getEvents() {
     const filterType = this._filterModel.getFilter();
     const events = this._eventsModel.getEvents();
-    // const filtredEvents = filter[filterType](events);
-    const filtredEvents = filter[filterType](events);
+    const filteredEvents = filter[filterType](events);
 
     switch (this._currentSortType) {
       case SortType.TIME:
-        return filtredEvents.sort(sortEventByTime);
+        return filteredEvents.sort(sortEventByTime);
       case SortType.PRICE:
-        return filtredEvents.sort(sortEventByPrice);
+        return filteredEvents.sort(sortEventByPrice);
       default:
-        return filtredEvents.sort(sortEventByDay);
+        return filteredEvents.sort(sortEventByDay);
     }
   }
 
   // Метод уведомления всех презентеров о смене режима
   _handleModeChange() {
+    this._eventNewPresenter.destroy();
     this._eventPresenter.forEach((presenter) => presenter.resetView());
   }
 
@@ -69,10 +78,10 @@ export default class Trip {
         this._eventsModel.updateEvent(updateType, update);
         break;
       case UserAction.ADD_EVENT:
-        this._eventsModel.updateEvent(updateType, update);
+        this._eventsModel.addEvent(updateType, update);
         break;
       case UserAction.DELETE_EVENT:
-        this._eventsModel.updateEvent(updateType, update);
+        this._eventsModel.deleteEvent(updateType, update);
         break;
     }
   }
@@ -123,6 +132,7 @@ export default class Trip {
   }
 
   _clearTrip({resetSortType = false} = {}) {
+    this._eventNewPresenter.destroy();
     this._eventPresenter.forEach((presenter) => presenter.destroy());
     // Удаляет все пары ключ - значение из объекта Map
     this._eventPresenter.clear();

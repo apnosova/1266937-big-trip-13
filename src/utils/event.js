@@ -20,8 +20,6 @@ export const isFutureEvent = (startTime) => {
   return dayjs().isSameOrBefore(startTime, `D`);
 };
 
-// dayjs('2010-10-20').isSameOrBefore('2010-10-19', 'year')
-
 //  дата окончания маршрута меньше, чем текущая
 export const isPastEvent = (startTime) => {
   return dayjs().isAfter(startTime, `D`);
@@ -62,4 +60,8 @@ export const sortEventByTime = (eventA, eventB) => {
 
 export const sortEventByPrice = (eventA, eventB) => {
   return eventB.price - eventA.price;
+};
+
+export const isDatesEqual = (timeA, timeB) => {
+  return dayjs(timeA).isSame(dayjs(timeB));
 };
