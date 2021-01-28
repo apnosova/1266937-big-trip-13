@@ -2,6 +2,7 @@ import {EVENT_TYPES, DESTINATION_CITIES, OFFERS} from "../constants.js";
 import {capitalizeFirstLetter} from "../utils/common.js";
 import SmartView from "./smart.js";
 import dayjs from "dayjs";
+import he from "he";
 import {generateDescription, generateImages} from "../mock/event.js";
 
 import flatpickr from "flatpickr";
@@ -112,7 +113,7 @@ const createEventEditTemplate = (data) => {
             ${eventType}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-          value="${city}" list="destination-list-1">
+          value="${he.encode(city)}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${cityListTemplate}
           </datalist>
