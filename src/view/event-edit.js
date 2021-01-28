@@ -282,6 +282,12 @@ export default class EventEdit extends SmartView {
 
   _destinationChangeHandler(evt) {
     evt.preventDefault();
+
+    if (!DESTINATION_CITIES.includes(evt.target.value)) {
+      evt.target.setCustomValidity(`Choose a city from the list`);
+      return;
+    }
+
     this.updateData({
       city: evt.target.value,
       description: generateDescription(),
@@ -291,6 +297,12 @@ export default class EventEdit extends SmartView {
 
   _priceInputHandler(evt) {
     evt.preventDefault();
+
+    if (!Number.isInteger(+evt.target.value)) {
+      evt.target.setCustomValidity(`Please type an integer value`);
+      return;
+    }
+
     this.updateData({
       price: evt.target.value
     }, true);
