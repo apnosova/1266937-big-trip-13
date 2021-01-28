@@ -2,6 +2,7 @@ import {EVENT_TYPES, DESTINATION_CITIES, OFFERS} from "../constants.js";
 import {capitalizeFirstLetter} from "../utils/common.js";
 import SmartView from "./smart.js";
 import dayjs from "dayjs";
+import he from "he";
 import {generateDescription, generateImages} from "../mock/event.js";
 
 import flatpickr from "flatpickr";
@@ -10,13 +11,13 @@ import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const BLANK_EVENT = {
   eventType: EVENT_TYPES[0],
-  city: ``,
-  startTime: dayjs().format(`DD/MM/YY HH:mm`),
-  endTime: dayjs().format(`DD/MM/YY HH:mm`),
+  city: DESTINATION_CITIES[0],
+  startTime: dayjs(),
+  endTime: dayjs(),
   price: ``,
   offers: ``,
-  text: ``,
-  images: ``,
+  description: generateDescription(),
+  images: generateImages(),
 };
 
 const createEventTypeListTemplate = (currentType, eventTypes) => {
@@ -112,7 +113,7 @@ const createEventEditTemplate = (data) => {
             ${eventType}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-          value="${city}" list="destination-list-1">
+          value="${he.encode(city)}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${cityListTemplate}
           </datalist>
@@ -160,6 +161,7 @@ export default class EventEdit extends SmartView {
 
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
     this._eventTypeChangeHandler = this._eventTypeChangeHandler.bind(this);
     // this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
@@ -188,6 +190,7 @@ export default class EventEdit extends SmartView {
     this._setStartTimePicker();
     this._setEndTimePicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
   _setStartTimePicker() {
@@ -224,6 +227,22 @@ export default class EventEdit extends SmartView {
           onChange: this._endTimeChangeHandler
         }
     );
+  }
+
+  // Переопределяем метод родителя removeElement,
+  // чтобы при удалении удалялся более ненужный календарь
+  removeElement() {
+    super.removeElement();
+
+    if (this._startTimePicker) {
+      this._startTimePicker.destroy();
+      this._startTimePicker = null;
+    }
+
+    if (this._endTimePicker) {
+      this._endTimePicker.destroy();
+      this._endTimePicker = null;
+    }
   }
 
   // Навешивает внутренние обработчики
@@ -264,6 +283,12 @@ export default class EventEdit extends SmartView {
 
   _destinationChangeHandler(evt) {
     evt.preventDefault();
+
+    if (!DESTINATION_CITIES.includes(evt.target.value)) {
+      evt.target.setCustomValidity(`Choose a city from the list`);
+      return;
+    }
+
     this.updateData({
       city: evt.target.value,
       description: generateDescription(),
@@ -273,6 +298,12 @@ export default class EventEdit extends SmartView {
 
   _priceInputHandler(evt) {
     evt.preventDefault();
+
+    if (!Number.isInteger(+evt.target.value)) {
+      evt.target.setCustomValidity(`Please type an integer value`);
+      return;
+    }
+
     this.updateData({
       price: evt.target.value
     }, true);
@@ -293,9 +324,19 @@ export default class EventEdit extends SmartView {
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(EventEdit.parseDataToEvent(this._data));
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
+  }
+
   static parseEventToData(event) {
     return Object.assign({}, event, {
-
+    //
     });
   }
 
