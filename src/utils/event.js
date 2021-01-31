@@ -25,7 +25,7 @@ export const isPastEvent = (startTime) => {
   return dayjs().isAfter(startTime, `D`);
 };
 
-export const generateDuration = (startTime, endTime) => {
+export const countDuration = (startTime, endTime) => {
   const HOURS_IN_DAY = 24;
   const MINS_IN_HOUR = 60;
 

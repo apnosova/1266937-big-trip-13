@@ -34,7 +34,7 @@ export default class Filter extends AbstractView {
     this._filterTypeChangeHandler = this._filterTypeChangeHandler.bind(this);
   }
 
-  _getTemplate() {
+  getTemplate() {
     return createFilterTemplate(this._filters, this._currentFilter);
   }
 

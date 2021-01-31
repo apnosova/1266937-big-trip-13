@@ -7,7 +7,7 @@ const createCostInfoTemplate = () => {
 };
 
 export default class CostInfo extends AbstractView {
-  _getTemplate() {
+  getTemplate() {
     return createCostInfoTemplate();
   }
 }

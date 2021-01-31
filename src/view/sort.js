@@ -41,7 +41,7 @@ export default class Sort extends AbstractView {
     this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
   }
 
-  _getTemplate() {
+  getTemplate() {
     return createSortTemplate(this._currentSortType);
   }
 

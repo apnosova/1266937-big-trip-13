@@ -21,6 +21,9 @@ export const render = (container, child, position) => {
     case RenderPosition.BEFOREEND:
       container.append(child);
       break;
+    case RenderPosition.AFTEREND:
+      container.after(child);
+      break;
   }
 };
 

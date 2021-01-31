@@ -8,7 +8,7 @@ const createMainInfoTemplate = () => {
 };
 
 export default class MainInfo extends AbstractView {
-  _getTemplate() {
+  getTemplate() {
     return createMainInfoTemplate();
   }
 }

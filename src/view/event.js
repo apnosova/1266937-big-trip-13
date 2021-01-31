@@ -1,4 +1,4 @@
-import {formatEventDay, formatEventTime, formatMachineDate, generateDuration} from "../utils/event.js";
+import {formatEventDay, formatEventTime, formatMachineDate, countDuration} from "../utils/event.js";
 import {OFFERS} from "../constants.js";
 import AbstractView from "./abstract.js";
 import dayjs from "dayjs";
@@ -22,7 +22,7 @@ const createEventTemplate = (event) => {
     <span class="event__offer-title">${offer.description} </span>&plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span>
   </li>` : ``).join(``);
 
-  const duration = generateDuration(startTime, endTime);
+  const duration = countDuration(startTime, endTime);
 
   return `<li class="trip-events__item">
     <div class="event">
@@ -68,7 +68,7 @@ export default class Event extends AbstractView {
     this._favoriteBtnClickHandler = this._favoriteBtnClickHandler.bind(this);
   }
 
-  _getTemplate() {
+  getTemplate() {
     return createEventTemplate(this._event);
   }
 

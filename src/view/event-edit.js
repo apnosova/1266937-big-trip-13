@@ -179,7 +179,7 @@ export default class EventEdit extends SmartView {
     this.updateData(EventEdit.parseEventToData(event));
   }
 
-  _getTemplate() {
+  getTemplate() {
     return createEventEditTemplate(this._data);
   }
 

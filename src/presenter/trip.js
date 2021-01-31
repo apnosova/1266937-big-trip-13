@@ -7,7 +7,7 @@ import EventNewPresenter from "./event-new.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {sortEventByDay, sortEventByTime, sortEventByPrice} from "../utils/event.js";
 import {filter} from "../utils/filter.js";
-import {SortType, UserAction, UpdateType, FilterType} from "../constants.js";
+import {SortType, UserAction, UpdateType} from "../constants.js";
 
 
 export default class Trip {
@@ -28,22 +28,30 @@ export default class Trip {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
 
-    this._eventsModel.addObserver(this._handleModelEvent); // Обработка уведомлений от модели
-    this._filterModel.addObserver(this._handleModelEvent);
-
     this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._handleViewAction);
   }
 
   // Метод для инициализации модуля
   init() {
+    this._eventsModel.addObserver(this._handleModelEvent); // Обработка уведомлений от модели
+    this._filterModel.addObserver(this._handleModelEvent);
+
     // Метод инициализации вызывает метод для отрисовки таблицы со списком точек маршрута
     this._renderTrip();
   }
 
+  destroy() {
+    this._clearTrip({resetSortType: true});
+
+    remove(this._eventListComponent);
+
+    this._eventsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
   createNewEvent() {
-    this._currentSortType = SortType.DAY;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this._eventNewPresenter.init();
+
   }
 
   // Получение данных из модели учитывает выбранную сортировку

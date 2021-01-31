@@ -7,7 +7,7 @@ const createNoEventTemplate = () => {
 };
 
 export default class NoEvent extends AbstractView {
-  _getTemplate() {
+  getTemplate() {
     return createNoEventTemplate();
   }
 }
